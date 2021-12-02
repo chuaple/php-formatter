@@ -1,10 +1,11 @@
-'use strict';
 const vscode = require('vscode');
 const php = require('./php');
-const provide = {
-    provideDocumentFormattingEdits(doc) {
-        const range = new vscode.Range(0, 0, doc.lineCount - 1, doc.lineAt(doc.lineCount - 1).text.length);
-        return [vscode.TextEdit.replace(range, php(doc.getText(range)))];
-    },
+
+/** @param {vscode.TextDocument} document */
+const provideDocumentFormattingEdits = document => {
+    const range = new vscode.Range(0, 0, document.lineCount - 1, document.lineAt(document.lineCount - 1).text.length);
+    return [vscode.TextEdit.replace(range, php(document.getText(range)))];
 };
-exports.activate = context => context.subscriptions.push(vscode.languages.registerDocumentFormattingEditProvider('php', provide));
+
+exports.activate = ({ subscriptions }) =>
+    subscriptions.push(vscode.languages.registerDocumentFormattingEditProvider('php', { provideDocumentFormattingEdits }));

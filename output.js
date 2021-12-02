@@ -1,9 +1,6 @@
 const vscode = require('vscode');
-let outputChannel;
-module.exports = msg => {
-    if (outputChannel === undefined) {
-        outputChannel = vscode.window.createOutputChannel('formatter');
-        outputChannel.show();
-    }
-    outputChannel.appendLine(msg);
-};
+
+const outputChannel = vscode.window.createOutputChannel('lebab');
+outputChannel.show();
+
+module.exports = message => outputChannel.appendLine(message);

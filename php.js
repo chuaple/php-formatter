@@ -1,19 +1,19 @@
 const output = require('./output');
 
 const format = code => {
-    let leval = 0;
+    let level = 0;
     const indentSnippets = code => {
         code = code.trim();
         const comment = code.startsWith('/');
-        if ('})]'.includes(code.charAt(0))) leval--;
-        if (code) code = `${' '.repeat(leval * 4)}${code}`;
-        if ('{(['.includes(code.charAt(code.length - 1)) && !comment) leval++;
+        if ('})]'.includes(code.charAt(0))) level--;
+        if (code) code = `${' '.repeat(level * 4)}${code}`;
+        if ('{(['.includes(code.charAt(code.length - 1)) && !comment) level++;
         return code;
     };
     output('[formatCode] Start');
     const contents = [];
     return code
-        .replace(/(['"])([\s\S]*?)(\1)/g, (_exp, q, content) => ((contents.push(content), `${q}quotestring${q}`)))
+        .replace(/(['"])([\s\S]*?)(\1)/g, (_, q, c) => (contents.push(c), `${q}quotestring${q}`))
 
         .replace(/ ?([\+\-\*\/\.\?!><]?={1,3})(?!\>) ?/g, ' $1 ') // `=` [>1]
         .replace(/ ?([\&\|]{2}) ?/g, ' $1 ') // `&&` `||` [>1]
@@ -33,12 +33,14 @@ const format = code => {
         .replace(/[；;](.)/g, ';\n$1') // after `;` [LF]
         .replace(/for \([\s\S]*?\)/g, exp => exp.replace(/;\s+/g, '; ')) // `for` except
 
-        .split(/\r?\n/).map(indentSnippets).join('\n') // 设置缩进
+        .split(/\r?\n/)
+        .map(indentSnippets)
+        .join('\n') // 设置缩进
 
         .replace(/([^\{])\n+( *(public |private )?(function |class ))/g, '$1\n\n$2') // 函数/类前添加空行
         .replace(/(\n{2,})/g, '\n\n') // 去除多余空行
 
-        .replace(/(['"]).*?(\1)/g, (_exp, q, content) => (((content = contents.shift()), q === '"' && content.match(/[\$\n']/g) ? `"${content}"` : `'${content}'`)));
+        .replace(/(['"]).*?(\1)/g, (_, q, c) => ((c = contents.shift()), q === '"' && c.match(/[\$\n']/g) ? `"${c}"` : `'${c}'`));
 };
 
-module.exports = code => code.startsWith('\<?php') ? format(code) : code;
+module.exports = code => (code.startsWith('<?php') ? format(code) : code);
